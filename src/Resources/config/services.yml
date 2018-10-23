@@ -5,3 +5,5 @@ services:
     Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter:
         arguments:
             $config: '%crassula_google_cloud_error_reporting.config%'
+
+    Crassula\Bundle\GoogleCloudErrorReportingBundle\EventListener\ReportErrorListener: ~

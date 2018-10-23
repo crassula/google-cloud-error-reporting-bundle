@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Crassula\Bundle\GoogleCloudErrorReportingBundle\DependencyInjection;
 
+use Crassula\Bundle\GoogleCloudErrorReportingBundle\EventListener\ReportErrorListener;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -37,5 +38,10 @@ class CrassulaGoogleCloudErrorReportingExtension extends Extension
         $loader->load('services.yml');
 
         $container->setParameter('crassula_google_cloud_error_reporting.config', $config);
+
+        if ($config['use_listeners']) {
+            $listener = $container->getDefinition(ReportErrorListener::class);
+            $listener->addTag('kernel.event_subscriber');
+        }
     }
 }
