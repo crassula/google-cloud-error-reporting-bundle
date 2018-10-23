@@ -1,0 +1,4 @@
+services:
+#    crassula_google_cloud_error_reporting.example:
+#        class: Crassula\Bundle\GoogleCloudErrorReportingBundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]
