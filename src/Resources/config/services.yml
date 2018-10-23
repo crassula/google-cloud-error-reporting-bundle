@@ -1,4 +1,7 @@
 services:
-#    crassula_google_cloud_error_reporting.example:
-#        class: Crassula\Bundle\GoogleCloudErrorReportingBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]
+    _defaults:
+        autowire: true
+
+    Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter:
+        arguments:
+            $config: '%crassula_google_cloud_error_reporting.config%'

@@ -35,5 +35,7 @@ class CrassulaGoogleCloudErrorReportingExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $container->setParameter('crassula_google_cloud_error_reporting.config', $config);
     }
 }
