@@ -1,0 +1,33 @@
+{
+    "name": "crassula/google-cloud-error-reporting-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony bundle for Google Cloud Error Reporting",
+    "keywords": [
+        "google cloud",
+        "error reporting"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/crassula/google-cloud-error-reporting-bundle",
+    "authors": [
+        {
+            "name": "Vladislav Nikolayev",
+            "email": "luxemate1@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Crassula\\Bundle\\GoogleCloudErrorReportingBundle\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "google/cloud-error-reporting": "^0.12.1",
+        "symfony/config": "^3.3",
+        "symfony/console": "^3.3",
+        "symfony/dependency-injection": "^3.3",
+        "symfony/event-dispatcher": "^3.3",
+        "symfony/http-foundation": "^3.3",
+        "symfony/http-kernel": "^3.3",
+        "symfony/security": "^3.3"
+    }
+}
