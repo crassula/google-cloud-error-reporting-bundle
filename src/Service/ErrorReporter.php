@@ -67,9 +67,9 @@ class ErrorReporter
      * @param \Exception $exception
      * @param array      $options
      *
-     * @return ReportErrorEventResponse
+     * @return null|ReportErrorEventResponse
      */
-    public function report(\Exception $exception, array $options = []): ReportErrorEventResponse
+    public function report(\Exception $exception, array $options = []): ?ReportErrorEventResponse
     {
         if (!$this->config['enabled']) {
             return null;
