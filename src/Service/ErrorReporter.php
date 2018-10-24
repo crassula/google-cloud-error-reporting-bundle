@@ -83,10 +83,6 @@ class ErrorReporter
             return false;
         }
 
-        if ($exception === null || !$exception instanceof \Exception) {
-            return false;
-        }
-
         $optionsResolver = new OptionsResolver();
         $this->configureOptions($optionsResolver);
         $options = $optionsResolver->resolve($options);
