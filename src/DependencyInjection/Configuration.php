@@ -41,7 +41,9 @@ class Configuration implements ConfigurationInterface
                     ->info('Google Cloud Platform project ID.')
                     ->isRequired()
                     ->validate()
-                        ->ifTrue(function ($v) { return !(is_null($v) || is_string($v)); })
+                        ->ifTrue(function ($v) {
+                            return !(is_null($v) || is_string($v));
+                        })
                         ->thenInvalid('Project ID must be a string')
                     ->end()
                 ->end()
@@ -69,7 +71,9 @@ class Configuration implements ConfigurationInterface
                         ->variableNode('clientConfig')
                             ->info('Client method configuration, including retry settings. This option can be either a path to a JSON file, or a PHP array containing the decoded JSON data. By default this settings points to the default client config file, which is provided in the resources folder.')
                             ->validate()
-                                ->ifTrue(function ($v) { return !(is_null($v) || is_string($v) || is_array($v)); })
+                                ->ifTrue(function ($v) {
+                                    return !(is_null($v) || is_string($v) || is_array($v));
+                                })
                                 ->thenInvalid('"clientConfig" must be a path to a JSON file, or an array containing the decoded JSON data')
                             ->end()
                         ->end()
@@ -77,7 +81,9 @@ class Configuration implements ConfigurationInterface
                             ->info('The credentials to be used by the client to authorize API calls. This option accepts either a path to a credentials file, or a decoded credentials file as array.')
                             ->isRequired()
                             ->validate()
-                                ->ifTrue(function ($v) { return !(is_null($v) || is_string($v) || is_array($v)); })
+                                ->ifTrue(function ($v) {
+                                    return !(is_null($v) || is_string($v) || is_array($v));
+                                })
                                 ->thenInvalid('"credentials" must be a path to a credentials file, or a decoded credentials file as array')
                             ->end()
                         ->end()
