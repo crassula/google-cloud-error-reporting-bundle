@@ -4,6 +4,7 @@
     "description": "Symfony bundle for Google Cloud Error Reporting",
     "keywords": [
         "google cloud",
+        "stackdriver",
         "error reporting"
     ],
     "license": "MIT",
