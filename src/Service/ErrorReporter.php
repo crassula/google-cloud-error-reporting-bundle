@@ -215,13 +215,13 @@ class ErrorReporter
             'http_request' => function (Options $options): ?Request {
                 return $this->requestStack->getMasterRequest();
             },
-            'http_response_code' => null,
+            'http_response_status_code' => null,
             'user' => null,
             'request_options' => [],
         ]);
 
         $resolver->setAllowedTypes('http_request', ['null', Request::class]);
-        $resolver->setAllowedTypes('http_response_code', ['null', 'int']);
+        $resolver->setAllowedTypes('http_response_status_code', ['null', 'int']);
         $resolver->setAllowedTypes('user', ['null', 'string']);
         $resolver->setAllowedTypes('request_options', 'array');
     }
@@ -238,7 +238,7 @@ class ErrorReporter
             return;
         }
 
-        $httpResponseCode = $options['http_response_code'];
+        $httpResponseCode = $options['http_response_status_code'];
         $httpRequestContext = $this->createHttpRequestContext(
             $httpRequest,
             $httpResponseCode
