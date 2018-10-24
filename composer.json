@@ -28,6 +28,7 @@
         "symfony/event-dispatcher": "^3.3",
         "symfony/http-foundation": "^3.3",
         "symfony/http-kernel": "^3.3",
+        "symfony/monolog-bridge": "^3.3",
         "symfony/security": "^3.3"
     }
 }
