@@ -10,7 +10,7 @@ This bundle requires Symfony 3.3+. Additionally you may want to install grpc and
 
 ## Installation
 
-Add `[crassula/google-cloud-error-reporting-bundle](https://packagist.org/packages/crassula/google-cloud-error-reporting-bundle)` to your composer.json file:
+Add [`crassula/google-cloud-error-reporting-bundle`](https://packagist.org/packages/crassula/google-cloud-error-reporting-bundle) to your composer.json file:
 
 ```bash
 $ composer require crassula/google-cloud-error-reporting-bundle
