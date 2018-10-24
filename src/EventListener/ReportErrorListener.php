@@ -81,21 +81,21 @@ class ReportErrorListener implements EventSubscriberInterface
      */
     public function reportError(Event $event): void
     {
-        if (null === $this->exception || !$this->exception instanceof \Exception) {
+        if ($this->exception === null || !$this->exception instanceof \Exception) {
             return;
         }
 
         $request = null;
-        $response = null;
+        $responseStatusCode = null;
 
         if ($event instanceof PostResponseEvent) {
             $request = $event->getRequest();
-            $response = $event->getResponse();
+            $responseStatusCode = $event->getResponse()->getStatusCode();
         }
 
         $this->errorReporter->report($this->exception, [
             'http_request' => $request,
-            'http_response' => $response,
+            'http_response_status_code' => $responseStatusCode,
         ]);
     }
 }

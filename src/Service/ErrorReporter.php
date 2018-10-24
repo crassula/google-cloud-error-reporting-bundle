@@ -16,13 +16,13 @@ namespace Crassula\Bundle\GoogleCloudErrorReportingBundle\Service;
 use Google\Cloud\ErrorReporting\V1beta1\ErrorContext;
 use Google\Cloud\ErrorReporting\V1beta1\HttpRequestContext;
 use Google\Cloud\ErrorReporting\V1beta1\ReportedErrorEvent;
-use Google\Cloud\ErrorReporting\V1beta1\ReportErrorEventResponse;
 use Google\Cloud\ErrorReporting\V1beta1\ReportErrorsServiceClient;
 use Google\Cloud\ErrorReporting\V1beta1\ServiceContext;
 use Google\Protobuf\Timestamp;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
@@ -47,36 +47,44 @@ class ErrorReporter
     private $logger;
 
     /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
      * Constructor.
      *
      * @param array           $config
      * @param TokenStorage    $tokenStorage
      * @param LoggerInterface $logger
+     * @param RequestStack $requestStack
      */
     public function __construct(
         array $config,
         TokenStorage $tokenStorage,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        RequestStack $requestStack
     ) {
         $this->config = $config;
         $this->tokenStorage = $tokenStorage;
         $this->logger = $logger;
+        $this->requestStack = $requestStack;
     }
 
     /**
      * @param \Exception $exception
      * @param array      $options
      *
-     * @return null|ReportErrorEventResponse
+     * @return bool
      */
-    public function report(\Exception $exception, array $options = []): ?ReportErrorEventResponse
+    public function report(\Exception $exception, array $options = []): bool
     {
         if (!$this->config['enabled']) {
-            return null;
+            return false;
         }
 
-        if ($exception == null || !$exception instanceof \Exception) {
-            return null;
+        if ($exception === null || !$exception instanceof \Exception) {
+            return false;
         }
 
         $optionsResolver = new OptionsResolver();
@@ -86,20 +94,8 @@ class ErrorReporter
         $errorEvent = $this->createErrorEvent($exception);
         $errorContext = $errorEvent->getContext();
 
-        if (null !== $options['http_request']) {
-            $httpRequestContext = $this->createHttpRequestContext(
-                $options['http_request'],
-                $options['http_response']
-            );
-            $errorContext->setHttpRequest($httpRequestContext);
-        }
-
-        if (null === $options['user'] && null !== $options['http_request']) {
-            $username = $this->getUsernameFromToken();
-            $errorContext->setUser($username);
-        } elseif (null !== $options['user']) {
-            $errorContext->setUser($options['user']);
-        }
+        $this->addHttpRequestContext($errorContext, $options);
+        $this->addUser($errorContext, $options);
 
         return $this->reportErrorEvent($errorEvent, $options);
     }
@@ -136,18 +132,18 @@ class ErrorReporter
      * @param ReportedErrorEvent $errorEvent
      * @param array              $options
      *
-     * @return null|ReportErrorEventResponse
+     * @return bool
      */
-    private function reportErrorEvent(ReportedErrorEvent $errorEvent, array $options = []): ?ReportErrorEventResponse
-    {
+    private function reportErrorEvent(
+        ReportedErrorEvent $errorEvent,
+        array $options = []
+    ): bool {
         try {
             $client = new ReportErrorsServiceClient($this->config['client_options']);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage(), [
-                'exception' => $e->getTraceAsString(),
-            ]);
+            $this->logClientException($e);
 
-            return null;
+            return false;
         }
 
         try {
@@ -155,16 +151,15 @@ class ErrorReporter
                 $this->config['project_id']
             );
 
-            return $client->reportErrorEvent($projectName, $errorEvent, $options['request_options']);
+            $client->reportErrorEvent($projectName, $errorEvent, $options['request_options']);
         } catch (\Exception $e) {
             $client->close();
+            $this->logClientException($e);
 
-            $this->logger->error($e->getMessage(), [
-                'exception' => $e->getTraceAsString(),
-            ]);
-
-            return null;
+            return false;
         }
+
+        return true;
     }
 
     /**
@@ -189,12 +184,14 @@ class ErrorReporter
 
     /**
      * @param Request  $request
-     * @param null|Response $response
+     * @param int|null $responseStatusCode
      *
      * @return HttpRequestContext
      */
-    private function createHttpRequestContext(Request $request, ?Response $response = null): HttpRequestContext
-    {
+    private function createHttpRequestContext(
+        Request $request = null,
+        ?int $responseStatusCode = null
+    ): HttpRequestContext {
         $httpRequestContext = new HttpRequestContext();
         $httpRequestContext->setMethod($request->getMethod());
         $httpRequestContext->setRemoteIp($request->getClientIp());
@@ -202,8 +199,8 @@ class ErrorReporter
         $httpRequestContext->setReferrer($request->headers->get('Referer', ''));
         $httpRequestContext->setUserAgent($request->headers->get('User-Agent', ''));
 
-        if (null !== $response) {
-            $httpRequestContext->setResponseStatusCode($response->getStatusCode());
+        if ($responseStatusCode !== null) {
+            $httpRequestContext->setResponseStatusCode($responseStatusCode);
         }
 
         return $httpRequestContext;
@@ -215,15 +212,63 @@ class ErrorReporter
     private function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'http_request' => null,
-            'http_response' => null,
+            'http_request' => function (Options $options): ?Request {
+                return $this->requestStack->getMasterRequest();
+            },
+            'http_response_code' => null,
             'user' => null,
             'request_options' => [],
         ]);
 
         $resolver->setAllowedTypes('http_request', ['null', Request::class]);
-        $resolver->setAllowedTypes('http_response', ['null', Response::class]);
+        $resolver->setAllowedTypes('http_response_code', ['null', 'int']);
         $resolver->setAllowedTypes('user', ['null', 'string']);
         $resolver->setAllowedTypes('request_options', 'array');
+    }
+
+    /**
+     * @param ErrorContext $errorContext
+     * @param array        $options
+     */
+    private function addHttpRequestContext(ErrorContext $errorContext, array $options): void
+    {
+        $httpRequest = $options['http_request'];
+
+        if ($httpRequest === null) {
+            return;
+        }
+
+        $httpResponseCode = $options['http_response_code'];
+        $httpRequestContext = $this->createHttpRequestContext(
+            $httpRequest,
+            $httpResponseCode
+        );
+        $errorContext->setHttpRequest($httpRequestContext);
+    }
+
+    /**
+     * @param ErrorContext $errorContext
+     * @param array        $options
+     */
+    private function addUser(ErrorContext $errorContext, array $options): void
+    {
+        if ($options['user'] === null && $options['http_request'] !== null) {
+            $username = $this->getUsernameFromToken();
+            $errorContext->setUser($username);
+        } elseif ($options['user'] !== null) {
+            $errorContext->setUser($options['user']);
+        }
+    }
+
+    /**
+     * @param \Exception $exception
+     */
+    private function logClientException(\Exception $exception): void
+    {
+        $message = sprintf('%s: %s', get_class($exception), $exception->getMessage());
+
+        $this->logger->error($message, [
+            'trace' => $exception->getTraceAsString(),
+        ]);
     }
 }
