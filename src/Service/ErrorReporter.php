@@ -134,23 +134,21 @@ class ErrorReporter
         ReportedErrorEvent $errorEvent,
         array $options = []
     ): bool {
-        try {
-            $client = new ReportErrorsServiceClient($this->config['client_options']);
-        } catch (\Exception $e) {
-            $this->logClientException($e);
-
-            return false;
-        }
+        $client = null;
 
         try {
             $projectName = ReportErrorsServiceClient::projectName(
                 $this->config['project_id']
             );
 
+            $client = new ReportErrorsServiceClient($this->config['client_options']);
             $client->reportErrorEvent($projectName, $errorEvent, $options['request_options']);
         } catch (\Exception $e) {
-            $client->close();
             $this->logClientException($e);
+
+            if ($client !== null) {
+                $client->close();
+            }
 
             return false;
         }
@@ -165,13 +163,7 @@ class ErrorReporter
     {
         $token = $this->tokenStorage->getToken();
 
-        if ($token === null) {
-            return '';
-        }
-
-        $user = $token->getUser();
-
-        if ($user === null) {
+        if ($token === null || $token->getUser() === null) {
             return '';
         }
 
