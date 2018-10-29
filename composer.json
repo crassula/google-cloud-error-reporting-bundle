@@ -23,13 +23,13 @@
     "require": {
         "php": ">=7.1",
         "google/cloud": "^v0.83.0",
-        "symfony/config": "^3.3",
-        "symfony/console": "^3.3",
-        "symfony/dependency-injection": "^3.3",
-        "symfony/event-dispatcher": "^3.3",
-        "symfony/http-foundation": "^3.3",
-        "symfony/http-kernel": "^3.3",
-        "symfony/monolog-bridge": "^3.3",
-        "symfony/security": "^3.3"
+        "symfony/config": "^3.3|^4.0",
+        "symfony/console": "^3.3|^4.0",
+        "symfony/dependency-injection": "^3.3|^4.0",
+        "symfony/event-dispatcher": "^3.3|^4.0",
+        "symfony/http-foundation": "^3.3|^4.0",
+        "symfony/http-kernel": "^3.3|^4.0",
+        "symfony/monolog-bridge": "^3.3|^4.0",
+        "symfony/security": "^3.3|^4.0"
     }
 }
