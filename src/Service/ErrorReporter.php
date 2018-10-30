@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * @author Vladislav Nikolayev <luxemate1@gmail.com>
@@ -37,12 +37,12 @@ class ErrorReporter
     private $config;
 
     /**
-     * @var TokenStorage
+     * @var TokenStorageInterface
      */
     private $tokenStorage;
 
     /**
-     * @var LoggerInterface
+     * @var TokenStorageInterface
      */
     private $logger;
 
@@ -54,14 +54,14 @@ class ErrorReporter
     /**
      * Constructor.
      *
-     * @param array           $config
-     * @param TokenStorage    $tokenStorage
-     * @param LoggerInterface $logger
-     * @param RequestStack $requestStack
+     * @param array                 $config
+     * @param TokenStorageInterface $tokenStorage
+     * @param LoggerInterface       $logger
+     * @param RequestStack          $requestStack
      */
     public function __construct(
         array $config,
-        TokenStorage $tokenStorage,
+        TokenStorageInterface $tokenStorage,
         LoggerInterface $logger,
         RequestStack $requestStack
     ) {
