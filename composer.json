@@ -30,6 +30,7 @@
         "symfony/http-foundation": "^3.3|^4.0",
         "symfony/http-kernel": "^3.3|^4.0",
         "symfony/monolog-bridge": "^3.3|^4.0",
+        "symfony/options-resolver": "^3.3|^4.0",
         "symfony/security": "^3.3|^4.0"
     }
 }
