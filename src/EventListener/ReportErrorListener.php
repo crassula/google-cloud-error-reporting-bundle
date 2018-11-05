@@ -15,7 +15,7 @@ namespace Crassula\Bundle\GoogleCloudErrorReportingBundle\EventListener;
 
 use Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter;
 use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleExceptionEvent;
+use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -33,9 +33,9 @@ class ReportErrorListener implements EventSubscriberInterface
     private $errorReporter;
 
     /**
-     * @var \Exception
+     * @var \Throwable
      */
-    private $exception;
+    private $error;
 
     /**
      * Constructor.
@@ -55,7 +55,7 @@ class ReportErrorListener implements EventSubscriberInterface
         return [
             KernelEvents::EXCEPTION => ['onKernelException', 128],
             KernelEvents::TERMINATE => 'reportError',
-            ConsoleEvents::EXCEPTION => ['onConsoleException', 128],
+            ConsoleEvents::ERROR => ['onConsoleError', 128],
             ConsoleEvents::TERMINATE => 'reportError',
         ];
     }
@@ -65,15 +65,15 @@ class ReportErrorListener implements EventSubscriberInterface
      */
     public function onKernelException(GetResponseForExceptionEvent $event): void
     {
-        $this->exception = $event->getException();
+        $this->error = $event->getException();
     }
 
     /**
-     * @param ConsoleExceptionEvent $event
+     * @param ConsoleErrorEvent $event
      */
-    public function onConsoleException(ConsoleExceptionEvent $event): void
+    public function onConsoleError(ConsoleErrorEvent $event): void
     {
-        $this->exception = $event->getException();
+        $this->error = $event->getError();
     }
 
     /**
@@ -81,7 +81,7 @@ class ReportErrorListener implements EventSubscriberInterface
      */
     public function reportError(Event $event): void
     {
-        if ($this->exception === null || !$this->exception instanceof \Exception) {
+        if ($this->error === null || !$this->error instanceof \Throwable) {
             return;
         }
 
@@ -93,7 +93,7 @@ class ReportErrorListener implements EventSubscriberInterface
             $responseStatusCode = $event->getResponse()->getStatusCode();
         }
 
-        $this->errorReporter->report($this->exception, [
+        $this->errorReporter->report($this->error, [
             'http_request' => $request,
             'http_response_status_code' => $responseStatusCode,
         ]);
