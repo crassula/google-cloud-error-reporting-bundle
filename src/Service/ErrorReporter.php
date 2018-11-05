@@ -72,12 +72,12 @@ class ErrorReporter
     }
 
     /**
-     * @param \Exception $exception
+     * @param \Throwable $throwable
      * @param array      $options
      *
      * @return bool
      */
-    public function report(\Exception $exception, array $options = []): bool
+    public function report(\Throwable $throwable, array $options = []): bool
     {
         if (!$this->config['enabled']) {
             return false;
@@ -87,7 +87,7 @@ class ErrorReporter
         $this->configureOptions($optionsResolver);
         $options = $optionsResolver->resolve($options);
 
-        $errorEvent = $this->createErrorEvent($exception);
+        $errorEvent = $this->createErrorEvent($throwable);
         $errorContext = $errorEvent->getContext();
 
         $this->addHttpRequestContext($errorContext, $options);
@@ -97,16 +97,16 @@ class ErrorReporter
     }
 
     /**
-     * @param \Exception $exception
+     * @param \Throwable $throwable
      *
      * @return ReportedErrorEvent
      */
-    private function createErrorEvent(\Exception $exception): ReportedErrorEvent
+    private function createErrorEvent(\Throwable $throwable): ReportedErrorEvent
     {
         $errorEvent = new ReportedErrorEvent();
 
-        $exceptionAsString = (string) $exception;
-        $errorEvent->setMessage('PHP Fatal error: '.$exceptionAsString);
+        $throwableAsString = (string) $throwable;
+        $errorEvent->setMessage('PHP Fatal error: '.$throwableAsString);
 
         $eventTime = new Timestamp();
         $utcDate = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -143,8 +143,8 @@ class ErrorReporter
 
             $client = new ReportErrorsServiceClient($this->config['client_options']);
             $client->reportErrorEvent($projectName, $errorEvent, $options['request_options']);
-        } catch (\Exception $e) {
-            $this->logClientException($e);
+        } catch (\Throwable $e) {
+            $this->logClientError($e);
 
             if ($client !== null) {
                 $client->close();
@@ -249,14 +249,14 @@ class ErrorReporter
     }
 
     /**
-     * @param \Exception $exception
+     * @param \Throwable $throwable
      */
-    private function logClientException(\Exception $exception): void
+    private function logClientError(\Throwable $throwable): void
     {
-        $message = sprintf('%s: %s', get_class($exception), $exception->getMessage());
+        $message = sprintf('%s: %s', get_class($throwable), $throwable->getMessage());
 
         $this->logger->error($message, [
-            'trace' => $exception->getTraceAsString(),
+            'trace' => $throwable->getTraceAsString(),
         ]);
     }
 }
