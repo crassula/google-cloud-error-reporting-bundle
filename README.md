@@ -69,16 +69,16 @@ You can additionally pass options as a second argument:
 
 | Name | Description
 | --- | ---
-| http_request              | Pass an instance of `Symfony\Component\HttpFoundation\Request` to report HTTP method, URL, user agent, referrer and remote IP address. If not set, bundle will attempt to retrieve master request from request stack.
-| http_response_status_code | Pass an instance of `Symfony\Component\HttpFoundation\Response` to report response status code.
-| user                      | Pass username to report. If not set, bundle will attempt to retrieve username from token storage.
+| http_request              | Instance of `Symfony\Component\HttpFoundation\Request` to report HTTP method, URL, user agent, referrer and remote IP address. If not set, bundle will attempt to retrieve master request from request stack.
+| http_response_status_code | Response status code.
+| user                      | Affected user's name, email, login or other username. If not set, bundle will attempt to retrieve username from token storage.
 | request_options           | Options related to Google Cloud Error Reporting package: <br><ul><li>retrySettings - See `\Google\ApiCore\RetrySettings::__construct` for available options</li></ul>
 
 ## Notes
 
 #### About automatic error reporting
 
-When config option `use_listeners` is enabled, bundle registers event listeners for `kernel.exception` and `console.exception` events with priority _128_.
+When config option `use_listeners` is enabled, bundle registers event listeners for `kernel.exception` and `console.error` events with priority _128_.
 
 Errors are reported on `kernel.terminate` and `console.terminate`.
 
