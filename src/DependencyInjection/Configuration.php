@@ -122,6 +122,11 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('ignored_errors')
+                    ->info('The list of fully qualified class names of errors to ignore during reporting.')
+                    ->example(['Symfony\Component\HttpKernel\Exception\HttpException'])
+                    ->scalarPrototype()->end()
+                ->end()
             ->end()
         ;
 

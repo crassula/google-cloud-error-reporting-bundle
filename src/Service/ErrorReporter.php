@@ -72,14 +72,18 @@ class ErrorReporter
     }
 
     /**
-     * @param \Throwable $throwable
+     * @param \Throwable $error
      * @param array      $options
      *
      * @return bool
      */
-    public function report(\Throwable $throwable, array $options = []): bool
+    public function report(\Throwable $error, array $options = []): bool
     {
         if (!$this->config['enabled']) {
+            return false;
+        }
+
+        if ($this->isErrorIgnored($error)) {
             return false;
         }
 
@@ -87,7 +91,7 @@ class ErrorReporter
         $this->configureOptions($optionsResolver);
         $options = $optionsResolver->resolve($options);
 
-        $errorEvent = $this->createErrorEvent($throwable);
+        $errorEvent = $this->createErrorEvent($error);
         $errorContext = $errorEvent->getContext();
 
         $this->addHttpRequestContext($errorContext, $options);
@@ -97,16 +101,16 @@ class ErrorReporter
     }
 
     /**
-     * @param \Throwable $throwable
+     * @param \Throwable $error
      *
      * @return ReportedErrorEvent
      */
-    private function createErrorEvent(\Throwable $throwable): ReportedErrorEvent
+    private function createErrorEvent(\Throwable $error): ReportedErrorEvent
     {
         $errorEvent = new ReportedErrorEvent();
 
-        $throwableAsString = (string) $throwable;
-        $errorEvent->setMessage('PHP Fatal error: '.$throwableAsString);
+        $errorAsString = (string) $error;
+        $errorEvent->setMessage('PHP Fatal error: '.$errorAsString);
 
         $eventTime = new Timestamp();
         $utcDate = new \DateTime('now', new \DateTimeZone('UTC'));
@@ -249,14 +253,30 @@ class ErrorReporter
     }
 
     /**
-     * @param \Throwable $throwable
+     * @param \Throwable $error
      */
-    private function logClientError(\Throwable $throwable): void
+    private function logClientError(\Throwable $error): void
     {
-        $message = sprintf('%s: %s', get_class($throwable), $throwable->getMessage());
+        $message = sprintf('%s: %s', get_class($error), $error->getMessage());
 
         $this->logger->error($message, [
-            'trace' => $throwable->getTraceAsString(),
+            'trace' => $error->getTraceAsString(),
         ]);
+    }
+
+    /**
+     * @param \Throwable $error
+     *
+     * @return bool
+     */
+    private function isErrorIgnored(\Throwable $error): bool
+    {
+        foreach ($this->config['ignored_errors'] as $className) {
+            if ($error instanceof $className) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
