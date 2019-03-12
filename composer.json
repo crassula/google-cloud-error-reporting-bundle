@@ -22,7 +22,7 @@
     },
     "require": {
         "php": ">=7.1",
-        "google/cloud": "^v0.83.0",
+        "google/cloud": "^v0.96.0",
         "symfony/config": "^3.3|^4.0",
         "symfony/console": "^3.3|^4.0",
         "symfony/dependency-injection": "^3.3|^4.0",
