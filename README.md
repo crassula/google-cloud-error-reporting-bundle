@@ -78,7 +78,7 @@ You can additionally pass options as a second argument:
 
 #### About automatic error reporting
 
-When config option `use_listeners` is enabled, bundle registers event listeners for `kernel.exception` and `console.error` events with priority _128_.
+When config option `use_listeners` is enabled, bundle registers event listeners for `kernel.exception` and `console.error` events with priority _2048_.
 
 Errors are reported on `kernel.terminate` and `console.terminate`.
 
