@@ -53,9 +53,9 @@ class ReportErrorListener implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::EXCEPTION => ['onKernelException', 128],
+            KernelEvents::EXCEPTION => ['onKernelException', 2048],
             KernelEvents::TERMINATE => 'reportError',
-            ConsoleEvents::ERROR => ['onConsoleError', 128],
+            ConsoleEvents::ERROR => ['onConsoleError', 2048],
             ConsoleEvents::TERMINATE => 'reportError',
         ];
     }
