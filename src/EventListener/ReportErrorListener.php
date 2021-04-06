@@ -27,29 +27,14 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class ReportErrorListener implements EventSubscriberInterface
 {
-    /**
-     * @var ErrorReporter
-     */
-    private $errorReporter;
+    private ErrorReporter $errorReporter;
+    private ?\Throwable $error = null;
 
-    /**
-     * @var \Throwable
-     */
-    private $error;
-
-    /**
-     * Constructor.
-     *
-     * @param ErrorReporter $errorReporter
-     */
     public function __construct(ErrorReporter $errorReporter)
     {
         $this->errorReporter = $errorReporter;
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -60,25 +45,16 @@ class ReportErrorListener implements EventSubscriberInterface
         ];
     }
 
-    /**
-     * @param GetResponseForExceptionEvent $event
-     */
     public function onKernelException(GetResponseForExceptionEvent $event): void
     {
         $this->error = $event->getException();
     }
 
-    /**
-     * @param ConsoleErrorEvent $event
-     */
     public function onConsoleError(ConsoleErrorEvent $event): void
     {
         $this->error = $event->getError();
     }
 
-    /**
-     * @param Event $event
-     */
     public function reportError(Event $event): void
     {
         if ($this->error === null || !$this->error instanceof \Throwable) {

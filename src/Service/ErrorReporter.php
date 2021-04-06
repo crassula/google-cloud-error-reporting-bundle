@@ -29,36 +29,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 /**
  * @author Vladislav Nikolayev <luxemate1@gmail.com>
  */
-class ErrorReporter
+class ErrorReporter implements ErrorNotifier
 {
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
+    private TokenStorageInterface $tokenStorage;
+    private TokenStorageInterface $logger;
+    private RequestStack $requestStack;
 
-    /**
-     * @var TokenStorageInterface
-     */
-    private $tokenStorage;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    private $logger;
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
-     * Constructor.
-     *
-     * @param array                 $config
-     * @param TokenStorageInterface $tokenStorage
-     * @param LoggerInterface       $logger
-     * @param RequestStack          $requestStack
-     */
     public function __construct(
         array $config,
         TokenStorageInterface $tokenStorage,
@@ -71,12 +48,6 @@ class ErrorReporter
         $this->requestStack = $requestStack;
     }
 
-    /**
-     * @param \Throwable $error
-     * @param array      $options
-     *
-     * @return bool
-     */
     public function report(\Throwable $error, array $options = []): bool
     {
         if (!$this->config['enabled']) {
@@ -100,11 +71,6 @@ class ErrorReporter
         return $this->reportErrorEvent($errorEvent, $options);
     }
 
-    /**
-     * @param \Throwable $error
-     *
-     * @return ReportedErrorEvent
-     */
     private function createErrorEvent(\Throwable $error): ReportedErrorEvent
     {
         $errorEvent = new ReportedErrorEvent();
@@ -128,16 +94,8 @@ class ErrorReporter
         return $errorEvent;
     }
 
-    /**
-     * @param ReportedErrorEvent $errorEvent
-     * @param array              $options
-     *
-     * @return bool
-     */
-    private function reportErrorEvent(
-        ReportedErrorEvent $errorEvent,
-        array $options = []
-    ): bool {
+    private function reportErrorEvent(ReportedErrorEvent $errorEvent, array $options = []): bool
+    {
         $client = null;
 
         try {
@@ -160,9 +118,6 @@ class ErrorReporter
         return true;
     }
 
-    /**
-     * @return string
-     */
     private function getUsernameFromToken(): string
     {
         $token = $this->tokenStorage->getToken();
@@ -174,12 +129,6 @@ class ErrorReporter
         return $token->getUsername();
     }
 
-    /**
-     * @param Request  $request
-     * @param int|null $responseStatusCode
-     *
-     * @return HttpRequestContext
-     */
     private function createHttpRequestContext(
         Request $request = null,
         ?int $responseStatusCode = null
@@ -198,9 +147,6 @@ class ErrorReporter
         return $httpRequestContext;
     }
 
-    /**
-     * @param OptionsResolver $resolver
-     */
     private function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -218,10 +164,6 @@ class ErrorReporter
         $resolver->setAllowedTypes('request_options', 'array');
     }
 
-    /**
-     * @param ErrorContext $errorContext
-     * @param array        $options
-     */
     private function addHttpRequestContext(ErrorContext $errorContext, array $options): void
     {
         $httpRequest = $options['http_request'];
@@ -238,10 +180,6 @@ class ErrorReporter
         $errorContext->setHttpRequest($httpRequestContext);
     }
 
-    /**
-     * @param ErrorContext $errorContext
-     * @param array        $options
-     */
     private function addUser(ErrorContext $errorContext, array $options): void
     {
         if ($options['user'] === null && $options['http_request'] !== null) {
@@ -252,9 +190,6 @@ class ErrorReporter
         }
     }
 
-    /**
-     * @param \Throwable $error
-     */
     private function logClientError(\Throwable $error): void
     {
         $message = sprintf('%s: %s', get_class($error), $error->getMessage());
@@ -264,11 +199,6 @@ class ErrorReporter
         ]);
     }
 
-    /**
-     * @param \Throwable $error
-     *
-     * @return bool
-     */
     private function isErrorIgnored(\Throwable $error): bool
     {
         foreach ($this->config['ignored_errors'] as $className) {
