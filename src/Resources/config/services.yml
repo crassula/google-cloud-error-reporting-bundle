@@ -2,6 +2,9 @@ services:
     _defaults:
         autowire: true
 
+    Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorNotifier:
+        '@Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter'
+
     Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter:
         public: true
         arguments:
