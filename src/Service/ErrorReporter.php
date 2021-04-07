@@ -33,7 +33,7 @@ class ErrorReporter implements ErrorNotifier
 {
     private array $config;
     private TokenStorageInterface $tokenStorage;
-    private TokenStorageInterface $logger;
+    private LoggerInterface $logger;
     private RequestStack $requestStack;
 
     public function __construct(
