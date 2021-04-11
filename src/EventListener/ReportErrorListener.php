@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * @author Vladislav Nikolayev <luxemate1@gmail.com>
  */
-class ReportErrorListener implements EventSubscriberInterface
+final class ReportErrorListener implements EventSubscriberInterface
 {
     private ErrorReporter $errorReporter;
     private ?\Throwable $error = null;
