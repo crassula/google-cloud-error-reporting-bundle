@@ -3,6 +3,9 @@ services:
         autowire: true
 
     Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter:
+        '@Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\GoogleCloudErrorReporter'
+
+    Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\GoogleCloudErrorReporter:
         public: true
         arguments:
             $config: '%crassula_google_cloud_error_reporting.config%'
