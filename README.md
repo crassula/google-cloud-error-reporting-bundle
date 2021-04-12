@@ -61,7 +61,7 @@ use Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\GoogleCloudErrorRepo
 try {
     $this->doFaultyOperation();
 } catch (\Exception $e) {
-    $container->get(ErrorReporter::class)->report($e);
+    $container->get(GoogleCloudErrorReporter::class)->report($e);
 }
 ```
 
