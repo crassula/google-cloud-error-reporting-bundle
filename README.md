@@ -56,12 +56,12 @@ $ bin/console config:dump-reference CrassulaGoogleCloudErrorReportingBundle
 ## Sample
 
 ```php
-use Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\GoogleCloudErrorReporter;
+use Crassula\Bundle\GoogleCloudErrorReportingBundle\Service\ErrorReporter;
 
 try {
     $this->doFaultyOperation();
 } catch (\Exception $e) {
-    $container->get(GoogleCloudErrorReporter::class)->report($e);
+    $container->get(ErrorReporter::class)->report($e);
 }
 ```
 
